@@ -40,7 +40,7 @@ The CDROM image is expected to match the one from the `redump project`.
 
 The result can be found here :
  * https://blockos.org/releases/pcengine/HuVideo/Yuna
- * http://blockos.org/releases/pcengine/HuVideo/Gulliver (⚠ spoiler)
+ * http://blockos.org/releases/pcengine/HuVideo/Gulliver (⚠ spoilers)
 
 ### Parameters
  * `<decoder>` is the HuVideo decoder.
