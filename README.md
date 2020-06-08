@@ -1,8 +1,6 @@
 # HuVideo extractor for Ginga Ojousama Densetsu Yuna HuVIDEO CD / 銀河お嬢様伝説ユナ (HCD5078)
 # and  Kuusou Kagaku Sekai Gulliver Boy / 空想科学世界ガリバーボーイ (HCD5076)
 
-![Yuna](https://blockos.org/releases/pcengine/HuVideo/Yuna/video.gif)
-
 ## Decoder
 
 ### How to build
