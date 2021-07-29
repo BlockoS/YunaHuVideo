@@ -1,0 +1,21 @@
+[
+    { "name": "cd_read", "logical": "3d6f", "page": "f8" },
+    { "name": "scsi_cmd.save", "logical": "3e46", "page": "f8" },
+    { "name": "@l0", "logical": "3e48", "page": "f8" },
+    { "name": "scsi_cmd.load", "logical": "3e54", "page": "f8" },
+    { "name": "@l0", "logical": "3e56", "page": "f8" },
+    { "name": "scsi_status.get", "logical": "3c0f", "page": "f8" },
+    { "name": "scsi_cmd.init", "logical": "3c24", "page": "f8" },
+    { "name": "@busy", "logical": "3c34", "page": "f8" },
+    { "name": "scsi_cmd.send", "logical": "3c79", "page": "f8" },
+    { "name": "@l0", "logical": "3c7e", "page": "f8" },
+    { "name": "scsi_cmd.flush", "logical": "3cbc", "page": "f8" },
+    { "name": "@done", "logical": "3ceb", "page": "f8" },
+    { "name": "@wait", "logical": "3cc6", "page": "f8" },
+    { "name": "@delay", "logical": "3cc8", "page": "f8" },
+
+    { "name": "@init", "logical": "5644", "page": "69" },
+    { "name": "@ready", "logical": "564e", "page": "69" },
+    { "name": "@l0", "logical": "5651", "page": "69" },
+    { "name": "@l1", "logical": "5660", "page": "69" }
+]

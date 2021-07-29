@@ -1,0 +1,31 @@
+{
+    "l3a00": {
+        "filename": "gulliver_cdread.asm",
+        "type": "code",
+        "page": "f8",
+        "logical" : "3a00",
+        "offset": "81c70",
+        "size": "573",
+        "mpr": ["ff", "f8", "69", "81", "69", "6c", "68", "68" ]
+    },
+
+    "scsi_cmd.send": {
+        "filename": "gulliver_cdread.asm",
+        "type": "code",
+        "page": "69",
+        "logical" : "563e",
+        "offset": "1a8bde",
+        "size": "2b",
+        "mpr": ["ff", "f8", "69", "70", "74", "75", "6a", "68" ]
+    },
+
+    "unknown": {
+        "filename": "gulliver_cdread.asm",
+        "type": "code",
+        "page": "69",
+        "logical" : "5669",
+        "offset": "1a8c09",
+        "size": "60",
+        "mpr": ["ff", "f8", "69", "70", "74", "75", "6a", "68" ]
+    }
+}
