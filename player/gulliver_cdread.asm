@@ -48,7 +48,7 @@ scsi_read_sector:
           sta     <_dh
           lda     $56cb
           sta     <_al
-          jsr     l3c36_248
+          jsr     scsi_read.prepare
           jsr     scsi_cmd.send
           lda     $56c9
           sta     <_bl
@@ -66,11 +66,11 @@ scsi_read_sector:
 @resp:
           jsr     scsi_cmd.resp
           cmp     #$02
-          beq     l56bc_105
+          beq     @err
           rts     
-l56bc_105:
+@err:
           jsr     scsi_sense_data
-          jsr     l3ddc_248
+          jsr     scsi_check_suberror
           jsr     scsi_cmd.load
           dec     $56cc
           rts     
@@ -422,7 +422,18 @@ scsi_cmd.init:
 @busy:
           sec     
           rts     
-l3c36_248:
+; ----------------------------------------------------------------
+; prepare read command buffer
+;   in: _al - base address to use (see CD_BASE documentation in the Hu7 CD BIOS manual)
+;       _dh - sector count
+;       _dl - sector address (L)
+;       _cl - sector address (M)
+;       _ch - sector address (H)
+;  out: $224c - command buffer
+;         _bl - LSB of the command buffer address ($4c)
+;         _bh - MSB of the command buffer address = ($22)
+; ----------------------------------------------------------------
+scsi_read.prepare:
           lda     <_al
           asl     A
           clc     
@@ -705,44 +716,50 @@ cd_read_sector:
           bne     @l0
           cla     
           rts     
-l3ddc_248:
+; ----------------------------------------------------------------
+; check if the current sub error is fatal
+;  in: A - sub error code
+; out: A - $00 if the error is unrecoverable, $01 otherwise 
+;      Carry flag - set if the error is unrecoverable, cleared otherwise
+; ----------------------------------------------------------------
+scsi_check_suberror:
           cmp     #$00
-          beq     l3e1a_248
+          beq     @recoverable
           cmp     #$04
-          bne     l3de6_248
-          bra     l3e1a_248
-l3de6_248:
+          bne     @others
+          bra     @recoverable
+@others:
           cmp     #$0b
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$0d
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$11
-          beq     l3e1a_248
+          beq     @recoverable
           cmp     #$15
-          beq     l3e1a_248
+          beq     @recoverable
           cmp     #$16
-          beq     l3e1a_248
+          beq     @recoverable
           cmp     #$1c
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$1d
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$20
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$21
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$22
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$25
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$2a
-          beq     l3e1e_248
+          beq     @fatal
           cmp     #$2c
-          beq     l3e1e_248
-l3e1a_248:
+          beq     @fatal
+@recoverable:
           lda     #$01
           sec     
           rts     
-l3e1e_248:
+@fatal:
           cla     
           clc     
           rts     

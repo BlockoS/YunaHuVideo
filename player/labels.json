@@ -13,6 +13,19 @@
         "----------------------------------------------------------------"
     ]},
     { "name": "@busy", "logical": "3c34", "page": "f8" },
+    { "name": "scsi_read.prepare", "logical": "3c36", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "prepare read command buffer",
+        "  in: _al - base address to use (see CD_BASE documentation in the Hu7 CD BIOS manual)",
+        "      _dh - sector count",
+        "      _dl - sector address (L)",
+        "      _cl - sector address (M)",
+        "      _ch - sector address (H)",
+        " out: $224c - command buffer",
+        "        _bl - LSB of the command buffer address ($4c)",
+        "        _bh - MSB of the command buffer address = ($22)",
+        "----------------------------------------------------------------"
+    ]},
     { "name": "scsi_cmd.send", "logical": "3c79", "page": "f8", "description": [
         "----------------------------------------------------------------",
         "send command buffer",
@@ -74,6 +87,18 @@
     { "name": "@l0", "logical": "3db8", "page": "f8" },
     { "name": "@l1", "logical": "3dc9", "page": "f8" },
     
+    { "name": "scsi_check_suberror", "logical": "3ddc", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "check if the current sub error is fatal",
+        " in: A - sub error code",
+        "out: A - $00 if the error is unrecoverable, $01 otherwise ",
+        "     Carry flag - set if the error is unrecoverable, cleared otherwise",
+        "----------------------------------------------------------------"
+    ]},
+    { "name": "@others", "logical": "3de6", "page": "f8" },
+    { "name": "@recoverable", "logical": "3e1a", "page": "f8" },
+    { "name": "@fatal", "logical": "3e1e", "page": "f8" },
+
     { "name": "@init", "logical": "5644", "page": "69" },
     { "name": "@ready", "logical": "564e", "page": "69" },
     { "name": "@retry", "logical": "5651", "page": "69" },
@@ -83,5 +108,6 @@
     { "name": "@send", "logical": "5680", "page": "69" },
     { "name": "@read", "logical": "56a7", "page": "69" },
     { "name": "@std", "logical": "56b0", "page": "69" },
-    { "name": "@resp", "logical": "56b4", "page": "69" }
+    { "name": "@resp", "logical": "56b4", "page": "69" },
+    { "name": "@err", "logical": "56bc", "page": "69" }
 ]
