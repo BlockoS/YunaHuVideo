@@ -1,7 +1,7 @@
 	.code
 	.bank $069
 	.org $563e
-scsi_cmd.send:
+scsi_read_sector:
           jsr     scsi_cmd.save
           stz     $56cb
 @init:
@@ -12,34 +12,33 @@ scsi_cmd.send:
 @ready:
           clx     
           ldy     #$14
-@l0:
+@retry:
           jsr     scsi_status.get
           and     #$80
           bne     @l1
           dex     
-          bne     @l0
+          bne     @retry
           dey     
-          bne     @l0
+          bne     @retry
           bra     @init
 @l1:
           jsr     scsi_status.get
           cmp     #$d0
-          beq     l5680_105
+          beq     @send
           bra     @l1
-
-unknown:
+@____unknown____:
           stz     $56cc
           jsr     scsi_cmd.save
-l566f_105:
+@l2:
           jsr     scsi_status.get
           cmp     #$c8
-          beq     l56a7_105
+          beq     @read
           cmp     #$d0
-          beq     l5680_105
+          beq     @send
           cmp     #$d8
-          beq     l56b4_105
-          bra     l566f_105
-l5680_105:
+          beq     @resp
+          bra     @l2
+@send:
           jsr     scsi_cmd.load
           lda     <_bl
           sta     $56c9
@@ -56,21 +55,21 @@ l5680_105:
           lda     $56ca
           sta     <_bh
           rts     
-l56a7_105:
+@read:
           jsr     l3e21_248
-          bne     l56b0_105
-          jsr     cd_read
+          bne     @std
+          jsr     cd_read_sector.fast
           rts     
-l56b0_105:
-          jsr     l3db5_248
+@std:
+          jsr     cd_read_sector
           rts     
-l56b4_105:
-          jsr     l3c94_248
+@resp:
+          jsr     scsi_cmd.resp
           cmp     #$02
           beq     l56bc_105
           rts     
 l56bc_105:
-          jsr     l3d1c_248
+          jsr     scsi_sense_data
           jsr     l3ddc_248
           jsr     scsi_cmd.load
           dec     $56cc
@@ -404,11 +403,14 @@ scsi_status.get:
 l3c15_248:
           lda     #$80
           tsb     cd_ctrl
-l3c1a_248:
+@l0:
           tst     #$40, cd_port
-          bne     l3c1a_248
+          bne     @l0
           trb     cd_ctrl
           rts     
+; ----------------------------------------------------------------
+; begin SCSI command transfer
+; ----------------------------------------------------------------
 scsi_cmd.init:
           lda     #$81
           sta     cd_cmd
@@ -455,6 +457,9 @@ l3c36_248:
           lda     #$22
           sta     <_bh
           rts     
+; ----------------------------------------------------------------
+; send command buffer
+; ----------------------------------------------------------------
 scsi_cmd.send:
           lda     [_bl]
           tax     
@@ -471,7 +476,11 @@ scsi_cmd.send:
           dex     
           bne     @l0
           rts     
-l3c94_248:
+; ----------------------------------------------------------------
+; retrieve SCSI Command response
+; out: A - ???
+; ----------------------------------------------------------------
+scsi_cmd.resp:
           phx     
           clx     
 l3c96_248:
@@ -523,11 +532,16 @@ l3cdf_248:
           bne     l3cdf_248
 @done:
           rts     
-l3cec_248:
+; ----------------------------------------------------------------
+; read n bytes from $1801
+;  in: _al - number of bytes to read
+; out: _bl - address where the data will be stored
+; ----------------------------------------------------------------
+cd_read_n:
           lda     cd_port
           and     #$f8
           cmp     #$c8
-          bne     l3cec_248
+          bne     cd_read_n
           lda     cd_cmd
           sta     [_bl]
           jsr     l3c15_248
@@ -542,47 +556,57 @@ l3d09_248:
           dec     <_al
           lda     <_al
           ora     <_ah
-          bne     l3cec_248
+          bne     cd_read_n
           rts     
-          asl     <$03
-          brk     
-          brk     
-          brk     
-          asl     A
-          brk     
-l3d19_248:
+
+cmd_request_sense:
+          .db $06
+          .db $03
+          .db $00
+          .db $00
+          .db $00
+          .db $0a
+          .db $00
+scsi_sense_data_ex:
           jsr     scsi_cmd.flush
-l3d1c_248:
+; ----------------------------------------------------------------
+; request SENSE DATA from cdrom
+; out: A - sub error code (b0-3) and class (b4-6)
+;      $2256 - buffer where the SENSE DATA will be stored
+; ----------------------------------------------------------------
+scsi_sense_data:
           jsr     scsi_cmd.init
-          bcs     l3d19_248
+          bcs     scsi_sense_data_ex
           ldx     #$14
           cly     
-l3d24_248:
+@retry:
           jsr     scsi_status.get
           and     #$80
-          bne     l3d33_248
+          bne     @loop
           dex     
-          bne     l3d24_248
+          bne     @retry
           dey     
-          bne     l3d24_248
-          bra     l3d1c_248
-l3d33_248:
+          bne     @retry
+          bra     scsi_sense_data
+@loop:
           jsr     scsi_status.get
           cmp     #$d0
-          beq     l3d44_248
+          beq     @send
           cmp     #$c8
-          beq     l3d51_248
+          beq     @read
           cmp     #$d8
-          beq     l3d64_248
-          bra     l3d33_248
-l3d44_248:
+          beq     @resp
+          bra     @loop
+; send REQUEST SENSE command
+@send:
           lda     #$12
           sta     <_bl
           lda     #$3d
           sta     <_bh
           jsr     scsi_cmd.send
-          bra     l3d33_248
-l3d51_248:
+          bra     @loop
+; retrieve SENSE DATA and store them at $2256
+@read:
           lda     #$56
           sta     <_bl
           lda     #$22
@@ -590,36 +614,42 @@ l3d51_248:
           lda     #$0a
           sta     <_al
           stz     <_ah
-          jsr     l3cec_248
-          bra     l3d33_248
-l3d64_248:
-          jsr     l3c94_248
+          jsr     cd_read_n
+          bra     @loop
+@resp:
+          jsr     scsi_cmd.resp
           cmp     #$00
-          bne     l3d1c_248
+          bne     scsi_sense_data
+; retrieve sub error code and class from SENSE DATA
+@suberror:
           lda     $225f
           rts     
-cd_read:
+; ----------------------------------------------------------------
+; Read sector data (2048 bytes) through $1808
+; out: _bl - address where the data will be stored
+; ----------------------------------------------------------------
+cd_read_sector.fast:
           cly     
           ldx     #$07
-l3d72_248:
+@l0:
           lda     cd_data
           sta     [_bl], Y
           nop     
           nop     
           nop     
           iny     
-          bne     l3d72_248
+          bne     @l0
           inc     <_bh
           dex     
-          bne     l3d72_248
-l3d82_248:
+          bne     @l0
+@l1:
           lda     cd_data
           sta     [_bl], Y
           nop     
           nop     
           iny     
           cpy     #$f6
-          bne     l3d82_248
+          bne     @l1
           php     
           sei     
           lda     cd_data
@@ -638,37 +668,41 @@ l3d82_248:
           nop     
           nop     
           nop     
-l3da6_248:
+@l2:
           lda     cd_data
           sta     [_bl], Y
           nop     
           nop     
           nop     
           iny     
-          bne     l3da6_248
+          bne     @l2
           inc     <_bh
           cla     
           rts     
-l3db5_248:
+; ----------------------------------------------------------------
+; read sector data (2048 bytes) through $1801
+; out: _bl - address where the data will be stored
+; ----------------------------------------------------------------
+cd_read_sector:
           cly     
           ldx     #$08
-l3db8_248:
+@l0:
           lda     cd_port
           and     #$40
-          beq     l3db8_248
+          beq     @l0
           lda     cd_cmd
           sta     [_bl], Y
           lda     #$80
           tsb     cd_ctrl
-l3dc9_248:
+@l1:
           tst     #$40, cd_port
-          bne     l3dc9_248
+          bne     @l1
           trb     cd_ctrl
           iny     
-          bne     l3db8_248
+          bne     @l0
           inc     <_bh
           dex     
-          bne     l3db8_248
+          bne     @l0
           cla     
           rts     
 l3ddc_248:

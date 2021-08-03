@@ -5,27 +5,38 @@
         "page": "f8",
         "logical" : "3a00",
         "offset": "81c70",
-        "size": "573",
+        "size": "312",
         "mpr": ["ff", "f8", "69", "81", "69", "6c", "68", "68" ]
     },
 
-    "scsi_cmd.send": {
+    "cmd_request_sense": {
+        "filename": "gulliver_cdread.asm",
+        "type": "data",
+        "page": "f8",
+        "logical" : "3d12",
+        "offset": "81f82",
+        "size": "7",
+        "mpr": ["ff", "f8", "69", "81", "69", "6c", "68", "68" ],
+        "data": { "type":"hex", "element_size": 1, "elements_per_line": 1 }
+    },
+
+    "scsi_sense_data_ex": {
+        "filename": "gulliver_cdread.asm",
+        "type": "code",
+        "page": "f8",
+        "logical" : "3d19",
+        "offset": "81f89",
+        "size": "25a",
+        "mpr": ["ff", "f8", "69", "81", "69", "6c", "68", "68" ]
+    },
+
+    "scsi_read_sector": {
         "filename": "gulliver_cdread.asm",
         "type": "code",
         "page": "69",
         "logical" : "563e",
         "offset": "1a8bde",
-        "size": "2b",
-        "mpr": ["ff", "f8", "69", "70", "74", "75", "6a", "68" ]
-    },
-
-    "unknown": {
-        "filename": "gulliver_cdread.asm",
-        "type": "code",
-        "page": "69",
-        "logical" : "5669",
-        "offset": "1a8c09",
-        "size": "60",
+        "size": "8b",
         "mpr": ["ff", "f8", "69", "70", "74", "75", "6a", "68" ]
     }
 }

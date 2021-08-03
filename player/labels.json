@@ -1,21 +1,87 @@
 [
-    { "name": "cd_read", "logical": "3d6f", "page": "f8" },
     { "name": "scsi_cmd.save", "logical": "3e46", "page": "f8" },
     { "name": "@l0", "logical": "3e48", "page": "f8" },
     { "name": "scsi_cmd.load", "logical": "3e54", "page": "f8" },
     { "name": "@l0", "logical": "3e56", "page": "f8" },
     { "name": "scsi_status.get", "logical": "3c0f", "page": "f8" },
-    { "name": "scsi_cmd.init", "logical": "3c24", "page": "f8" },
+
+    { "name": "@l0", "logical": "3c1a", "page": "f8" },
+
+    { "name": "scsi_cmd.init", "logical": "3c24", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "begin SCSI command transfer",
+        "----------------------------------------------------------------"
+    ]},
     { "name": "@busy", "logical": "3c34", "page": "f8" },
-    { "name": "scsi_cmd.send", "logical": "3c79", "page": "f8" },
+    { "name": "scsi_cmd.send", "logical": "3c79", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "send command buffer",
+        "----------------------------------------------------------------"
+    ]},
     { "name": "@l0", "logical": "3c7e", "page": "f8" },
+    
+    { "name": "scsi_cmd.resp", "logical": "3c94", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "retrieve SCSI Command response",
+        "out: A - ???",
+        "----------------------------------------------------------------"
+    ]},
+
     { "name": "scsi_cmd.flush", "logical": "3cbc", "page": "f8" },
-    { "name": "@done", "logical": "3ceb", "page": "f8" },
     { "name": "@wait", "logical": "3cc6", "page": "f8" },
     { "name": "@delay", "logical": "3cc8", "page": "f8" },
+    { "name": "@done", "logical": "3ceb", "page": "f8" },
+    
+    { "name": "cd_read_n", "logical": "3cec", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "read n bytes from $1801",
+        " in: _al - number of bytes to read",
+        "out: _bl - address where the data will be stored",
+        "----------------------------------------------------------------"
+    ]},
+       
+    { "name": "scsi_sense_data_ex", "logical": "3d19", "page": "f8" },
+    { "name": "scsi_sense_data", "logical": "3d1c", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "request SENSE DATA from cdrom",
+        "out: A - sub error code (b0-3) and class (b4-6)",
+        "     $2256 - buffer where the SENSE DATA will be stored",
+        "----------------------------------------------------------------"
+    ]},
+    { "name": "@retry", "logical": "3d24", "page": "f8" },
+    { "name": "@loop", "logical": "3d33", "page": "f8" },
+    { "name": "@send", "logical": "3d44", "page": "f8", "description": "send REQUEST SENSE command"},
+    { "name": "@read", "logical": "3d51", "page": "f8", "description": "retrieve SENSE DATA and store them at $2256"},
+    { "name": "@resp", "logical": "3d64", "page": "f8" },
+    { "name": "@suberror", "logical": "3d6b", "page": "f8", "description": "retrieve sub error code and class from SENSE DATA" },
 
+    { "name": "cd_read_sector.fast", "logical": "3d6f", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "Read sector data (2048 bytes) through $1808",
+        "out: _bl - address where the data will be stored",
+        "----------------------------------------------------------------"
+    ]},
+    { "name": "@l0", "logical": "3d72", "page": "f8" },
+    { "name": "@l1", "logical": "3d82", "page": "f8" },
+    { "name": "@l2", "logical": "3da6", "page": "f8" },
+    
+    { "name": "cd_read_sector", "logical": "3db5", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "read sector data (2048 bytes) through $1801",
+        "out: _bl - address where the data will be stored",
+        "----------------------------------------------------------------"
+    ]},
+    { "name": "@l0", "logical": "3db8", "page": "f8" },
+    { "name": "@l1", "logical": "3dc9", "page": "f8" },
+    
     { "name": "@init", "logical": "5644", "page": "69" },
     { "name": "@ready", "logical": "564e", "page": "69" },
-    { "name": "@l0", "logical": "5651", "page": "69" },
-    { "name": "@l1", "logical": "5660", "page": "69" }
+    { "name": "@retry", "logical": "5651", "page": "69" },
+    { "name": "@l1", "logical": "5660", "page": "69" },
+    { "name": "@____unknown____", "logical": "5669", "page": "69" },
+    { "name": "@l2", "logical": "566f", "page": "69" },
+    { "name": "@send", "logical": "5680", "page": "69" },
+    { "name": "@read", "logical": "56a7", "page": "69" },
+    { "name": "@std", "logical": "56b0", "page": "69" },
+    { "name": "@resp", "logical": "56b4", "page": "69" }
 ]
