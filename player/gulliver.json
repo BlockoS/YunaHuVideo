@@ -6,7 +6,7 @@
         "logical" : "3a00",
         "offset": "81c70",
         "size": "312",
-        "mpr": ["ff", "f8", "69", "81", "69", "6c", "68", "68" ]
+        "mpr": ["ff", "f8", "69", "81", "69", "6c", "68", "00" ]
     },
 
     "cmd_request_sense": {
@@ -28,6 +28,16 @@
         "offset": "81f89",
         "size": "25a",
         "mpr": ["ff", "f8", "69", "81", "69", "6c", "68", "68" ]
+    },
+
+    "l_559c": {
+        "filename": "gulliver_cdread.asm",
+        "type": "code",
+        "page": "69",
+        "logical" : "559c",
+        "offset": "1a8b3c",
+        "size": "a2",
+        "mpr": ["ff", "f8", "69", "70", "74", "75", "6a", "68" ]
     },
 
     "scsi_read_sector": {

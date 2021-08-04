@@ -1,6 +1,94 @@
 	.code
 	.bank $069
-	.org $563e
+	.org $559c
+l_559c:
+          jsr     l5633_105
+          lda     $56d8
+          sta     <$a1
+          lda     $56d9
+          sta     <$a2
+l_55a9:
+          lda     <$a1
+          sta     $56d8
+          lda     <$a2
+          sta     $56d9
+          lda     <_al
+          sta     $56ce
+          stz     <$a3
+          jsr     l5628_105
+          jsr     scsi_read_sector
+          jsr     l5633_105
+          stz     <_bl
+          lda     #$c0
+          sta     <_bh
+l55c9_105:
+          jsr     l55d7_105
+          lda     $56cc
+          bne     l_559c
+          lda     $56ce
+          bne     l55c9_105
+          rts     
+l55d7_105:
+          lda     <$a3
+          sta     $56cd
+          lsr     A
+          lsr     A
+          clc     
+          adc     <$53
+          clc     
+          adc     #$02
+          tam     #$06
+          lda     #$06
+          sta     $56cf
+          stz     <_bl
+          lda     #$c0
+          tst     #$03, <$a3
+          beq     l55f6_105
+          lda     #$d0
+l55f6_105:
+          sta     <_bh
+l55f8_105:
+          jsr     scsi_read_sector.next
+          lda     $56cc
+          bne     l5627_105
+          inc     $56cd
+          tst     #$03, $56cd
+          bne     l5612_105
+          tma     #$06
+          inc     A
+          tam     #$06
+          lda     #$c0
+          sta     <_bh
+l5612_105:
+          dec     $56ce
+          dec     $56cf
+          bne     l55f8_105
+          lda     <$a3
+          clc     
+          adc     #$06
+          sta     <$a3
+          inc     <$a1
+          bne     l5627_105
+          inc     <$a2
+l5627_105:
+          rts     
+l5628_105:
+          ldx     #$07
+l562a_105:
+          lda     <_al, X
+          sta     $56d0, X
+          dex     
+          bpl     l562a_105
+          rts     
+l5633_105:
+          ldx     #$07
+l5635_105:
+          lda     $56d0, X
+          sta     <_al, X
+          dex     
+          bpl     l5635_105
+          rts     
+
 scsi_read_sector:
           jsr     scsi_cmd.save
           stz     $56cb
@@ -26,7 +114,7 @@ scsi_read_sector:
           cmp     #$d0
           beq     @send
           bra     @l1
-@____unknown____:
+scsi_read_sector.next:
           stz     $56cc
           jsr     scsi_cmd.save
 @l2:
@@ -123,7 +211,7 @@ l3a3c_248:
           beq     l3a64_248
           plx     
           bbr1    <$21, l3a5e_248
-          jmp     lffe0_104
+          jmp     lffe0_00
 l3a5e_248:
           jmp     [$2048]
 l3a61_248:
@@ -166,7 +254,7 @@ l3a64_248:
           php     
           jmp     video_reg_l
           bbr1    <$21, l3a5e_248
-          jmp     lffe0_104
+          jmp     lffe0_00
           pha     
           tma     #$07
           pha     
@@ -261,7 +349,7 @@ l3b21_248:
           sta     <_dh
           cla     
           tam     #$07
-          jsr     le0d8_104
+          jsr     psg_bios
           pha     
           lda     <$47
           tam     #$07
@@ -353,7 +441,7 @@ l3b9c_248:
 l3bc2_248:
           sta     <_dh
           jsr     l3a0d_248
-          bit     $e009
+          bit     cd_read
           rts     
           lda     #$01
           bra     l3bc2_248
@@ -400,12 +488,19 @@ scsi_status.get:
           lda     cd_port
           and     #$f8
           rts     
-l3c15_248:
+; ----------------------------------------------------------------
+; SCSI handshake
+; ----------------------------------------------------------------
+scsi_handshake:
           lda     #$80
           tsb     cd_ctrl
+; initiator (the PCE) set /ACK signal to 1
+; detect when target set /REQ signal to 0
 @l0:
           tst     #$40, cd_port
           bne     @l0
+; initiator (the PCE) set /ACK signal to 0
+@l1:
           trb     cd_ctrl
           rts     
 ; ----------------------------------------------------------------
@@ -483,7 +578,7 @@ scsi_cmd.send:
           lda     [_bl], Y
           iny     
           sta     cd_cmd
-          jsr     l3c15_248
+          jsr     scsi_handshake
           dex     
           bne     @l0
           rts     
@@ -504,11 +599,11 @@ l3c96_248:
           bra     l3c96_248
 l3ca5_248:
           ldx     cd_cmd
-          jsr     l3c15_248
+          jsr     scsi_handshake
           bra     l3c96_248
 l3cad_248:
           lda     cd_cmd
-          jsr     l3c15_248
+          jsr     scsi_handshake
 l3cb3_248:
           tst     #$80, cd_port
           bne     l3cb3_248
@@ -535,7 +630,7 @@ scsi_cmd.flush:
           tst     #$40, cd_port
           beq     @done
 l3cdc_248:
-          jsr     l3c15_248
+          jsr     scsi_handshake
 l3cdf_248:
           tst     #$40, cd_port
           bne     l3cdc_248
@@ -555,7 +650,7 @@ cd_read_n:
           bne     cd_read_n
           lda     cd_cmd
           sta     [_bl]
-          jsr     l3c15_248
+          jsr     scsi_handshake
           inc     <_bl
           bne     l3d03_248
           inc     <_bh
@@ -896,7 +991,7 @@ l3ee7_248:
           rts     
           lda     cd_cmd
           pha     
-          jsr     l3c15_248
+          jsr     scsi_handshake
           pla     
           rts     
           stx     cd_data

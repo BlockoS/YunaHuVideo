@@ -5,7 +5,16 @@
     { "name": "@l0", "logical": "3e56", "page": "f8" },
     { "name": "scsi_status.get", "logical": "3c0f", "page": "f8" },
 
-    { "name": "@l0", "logical": "3c1a", "page": "f8" },
+    { "name": "scsi_handshake", "logical": "3c15", "page": "f8", "description": [
+        "----------------------------------------------------------------",
+        "SCSI handshake",
+        "----------------------------------------------------------------"
+    ]},
+    { "name": "@l0", "logical": "3c1a", "page": "f8", "description": [
+        "initiator (the PCE) set /ACK signal to 1",
+        "detect when target set /REQ signal to 0" 
+    ]},
+    { "name": "@l1", "logical": "3c20", "page": "f8", "description": "initiator (the PCE) set /ACK signal to 0" },
 
     { "name": "scsi_cmd.init", "logical": "3c24", "page": "f8", "description": [
         "----------------------------------------------------------------",
@@ -99,11 +108,12 @@
     { "name": "@recoverable", "logical": "3e1a", "page": "f8" },
     { "name": "@fatal", "logical": "3e1e", "page": "f8" },
 
+    { "name": "l_55a9", "logical": "55a9", "page": "69" },
     { "name": "@init", "logical": "5644", "page": "69" },
     { "name": "@ready", "logical": "564e", "page": "69" },
     { "name": "@retry", "logical": "5651", "page": "69" },
     { "name": "@l1", "logical": "5660", "page": "69" },
-    { "name": "@____unknown____", "logical": "5669", "page": "69" },
+    { "name": "scsi_read_sector.next", "logical": "5669", "page": "69" },
     { "name": "@l2", "logical": "566f", "page": "69" },
     { "name": "@send", "logical": "5680", "page": "69" },
     { "name": "@read", "logical": "56a7", "page": "69" },
